@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>[hidden]{display:none!important}</style>
+<title>Tea Party Twenty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&display=swap">
+<style>
+:root{
+  /* Math Unit 4: Teen Numbers, sums to 20. One-screen garden tea party: equation on top, two treat groups, a ten-frame tray, three number bubbles, Carsi bottom-left */
+  --sky:#9ED9FF;
+  --ink:#4A3F6B;
+  --btn:#FFFDF7;
+  --gold:#FFD84D;
+  --tray:#FFF6DF;
+  --plate:#EAD9AE;
+  --grpA:#E2457F; --grpA-soft:#FFC2D8;
+  --grpB:#1E9E92; --grpB-soft:#B4F0E8;
+  --font-bubble:"Baloo 2","Arial Rounded MT Bold","Comic Sans MS",system-ui,sans-serif;
+  color-scheme: light;
+}
+html,body{height:100%}
+body{
+  margin:0;background:var(--sky);overflow:hidden;
+  -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;
+}
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+
+.controls{
+  position:fixed;display:flex;gap:14px;
+  right:calc(env(safe-area-inset-right,0px) + 16px);
+  top:calc(env(safe-area-inset-top,0px) + 16px);
+}
+.btn{
+  width:72px;height:72px;border-radius:50%;padding:0;cursor:pointer;
+  border:4px solid var(--ink);background:var(--btn);color:var(--ink);
+  display:grid;place-items:center;box-shadow:0 6px 0 var(--ink);
+  transition:transform .1s, box-shadow .1s;
+}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+.btn:focus-visible{outline:4px solid var(--btn);outline-offset:3px}
+.btn svg{width:38px;height:38px}
+@media (max-width:520px){.btn{width:60px;height:60px}.btn svg{width:32px;height:32px}}
+@media (max-width:420px){.controls{gap:10px}.btn{width:52px;height:52px;border-width:3px}.btn svg{width:28px;height:28px}}
+@media (max-width:360px){
+  .turn{font-size:18px;gap:6px;padding:4px 12px 4px 5px;border-width:3px}
+  .turn svg{width:24px;height:24px}
+}
+
+/* whose turn: name badge with a ring that empties as the turn runs out */
+.turn{
+  position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:10px;padding:6px 18px 6px 8px;
+  background:var(--kid,#FF9BC8);border:4px solid var(--ink);border-radius:999px;box-shadow:0 6px 0 var(--ink);
+  font-family:var(--font-bubble);font-weight:700;font-size:28px;line-height:1;color:var(--ink);
+  pointer-events:none;transition:background .4s;
+}
+.turn svg{width:40px;height:40px;transform:rotate(-90deg)}
+.turn.pop{animation:turnPop .7s cubic-bezier(.3,1.8,.5,1)}
+@keyframes turnPop{0%{transform:translateX(-50%) scale(.4)}100%{transform:translateX(-50%) scale(1)}}
+@media (max-width:640px), (max-height:500px){
+  .turn{left:calc(env(safe-area-inset-left,0px) + 16px);transform:none;font-size:22px}
+  .turn svg{width:32px;height:32px}
+  @keyframes turnPop{0%{transform:scale(.4)}100%{transform:scale(1)}}
+}
+
+/* start screen: one big play button unlocks sound and speech */
+#start{
+  position:fixed;inset:0;display:grid;place-items:center;background:rgba(74,63,107,.35);
+  border:0;padding:0;cursor:pointer;
+}
+#start[hidden]{display:none}
+#start span{
+  width:150px;height:150px;border-radius:50%;display:grid;place-items:center;
+  background:var(--gold);border:6px solid var(--ink);box-shadow:0 10px 0 var(--ink);
+  animation:breathe 1.4s ease-in-out infinite;
+}
+#start svg{width:70px;height:70px;margin-left:12px}
+@keyframes breathe{50%{transform:scale(1.08)}}
+
+/* rainbow progress: one band per solved problem */
+.band{fill:none;cursor:pointer;transition:stroke .5s, stroke-opacity .5s}
+
+/* equation */
+#eq{font-family:var(--font-bubble);font-weight:700;fill:var(--ink);cursor:pointer;
+  paint-order:stroke;stroke:#FFFFFF;stroke-width:12px;stroke-linejoin:round}
+#eq.pop{animation:eqPop .6s cubic-bezier(.3,1.8,.5,1);transform-box:fill-box;transform-origin:center}
+@keyframes eqPop{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+#plus{font-family:var(--font-bubble);font-weight:700;fill:var(--ink);opacity:.55;pointer-events:none}
+
+/* treats */
+.item{cursor:pointer;transition:transform .55s cubic-bezier(.3,1.35,.5,1)}
+.item.noanim{transition:none}
+.item.leave{opacity:0;transition:opacity .35s}
+.item text{pointer-events:none}
+.inner{transform-box:fill-box;transform-origin:center}
+.boing .inner{animation:boing .4s ease-out}
+.nudge .inner{animation:nudge .6s ease-in-out 3}
+@keyframes boing{0%{transform:scale(1)}35%{transform:scale(1.25,.8)}65%{transform:scale(.9,1.12)}100%{transform:scale(1)}}
+@keyframes nudge{50%{transform:translateY(-10px) scale(1.12)}}
+
+/* number bubbles */
+.choice{cursor:pointer}
+.choice text{font-family:var(--font-bubble);font-weight:700;fill:var(--ink);pointer-events:none}
+.choice circle{transition:fill .3s}
+.choice .inner{transition:opacity .3s}
+.choice.wrong .inner{opacity:.3;animation:wiggle .45s}
+.choice.right circle{fill:var(--gold)}
+.choice.right .inner{animation:boing .5s}
+.choices.glow .choice:not(.wrong) .inner{animation:nudge .6s ease-in-out 2}
+@keyframes wiggle{20%{transform:rotate(-12deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-7deg)}80%{transform:rotate(4deg)}}
+
+/* sky */
+.drift{animation:drift linear infinite}
+@keyframes drift{from{transform:translateX(-320px)}to{transform:translateX(1320px)}}
+#hint{pointer-events:none;transition:opacity .4s}
+#hint text{animation:bob 1s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+/* Carsi */
+#princess{cursor:pointer}
+#eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.5s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+#mouthOpen{opacity:0;transform-box:fill-box;transform-origin:center}
+#princess.talking #smile{opacity:0}
+#princess.talking #mouthOpen{opacity:1;animation:chatter .16s ease-in-out infinite alternate}
+@keyframes chatter{from{transform:scaleY(.35)}to{transform:scaleY(1)}}
+#princess{transform-box:fill-box;transform-origin:50% 100%}
+#princess.twirl{animation:twirl .9s ease-in-out}
+@keyframes twirl{0%,100%{transform:scaleX(1) translateY(0)}25%{transform:scaleX(-1) translateY(-18px)}50%{transform:scaleX(1) translateY(0)}75%{transform:scaleX(-1) translateY(-10px)}}
+#wandArm{transform-box:fill-box;transform-origin:0% 100%}
+#wandArm.waving{animation:waveArm .45s ease-in-out 4 alternate}
+@keyframes waveArm{to{transform:rotate(-28deg)}}
+
+@media (prefers-reduced-motion: reduce){
+  .drift,#hint text,#eyes,#start span,#princess.twirl{animation:none}
+  .item{transition-duration:.2s}
+  .nudge .inner,.choices.glow .choice:not(.wrong) .inner{animation:none}
+}
+</style>
+
+<svg id="scene" viewBox="0 0 1000 750" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Princess Carsi's tea party. Treats arrive in two groups. Tap each treat to count it onto the two trays, then tap the number that shows how many in all.">
+  <defs>
+    <linearGradient id="daySky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="700">
+      <stop offset="0" stop-color="#8FD3FF"/><stop offset="1" stop-color="#E3F5FF"/>
+    </linearGradient>
+  </defs>
+
+  <rect class="sky" x="-3000" y="-3000" width="7000" height="7000" fill="url(#daySky)"/>
+
+  <g class="drift" style="animation-duration:90s;animation-delay:-20s">
+    <g transform="translate(0 70) scale(.7)" fill="#FFFFFF" pointer-events="none">
+      <ellipse cx="40" cy="12" rx="80" ry="24"/><circle cx="0" cy="0" r="32"/><circle cx="42" cy="-20" r="40"/><circle cx="84" cy="0" r="30"/>
+    </g>
+  </g>
+  <g class="drift" style="animation-duration:120s;animation-delay:-75s">
+    <g transform="translate(0 120) scale(.55)" fill="#FFFFFF" pointer-events="none">
+      <ellipse cx="40" cy="12" rx="80" ry="24"/><circle cx="0" cy="0" r="32"/><circle cx="42" cy="-20" r="40"/><circle cx="84" cy="0" r="30"/>
+    </g>
+  </g>
+
+  <g id="rainbow"></g>
+
+  <g id="ground">
+    <path d="M-3000 30 L-200 30 Q250 -40 500 0 Q800 40 1300 -20 L4000 -20 L4000 3000 L-3000 3000 Z" fill="#8EDC6E"/>
+    <path d="M-3000 70 L0 70 Q500 10 1000 60 L4000 60 L4000 3000 L-3000 3000 Z" fill="#6CCB5F"/>
+  </g>
+
+  <g id="castle" stroke="#4A3F6B" stroke-width="4" stroke-linejoin="round" pointer-events="none">
+    <rect x="-60" y="-120" width="120" height="120" fill="#F1EAF7"/>
+    <rect x="-56" y="-138" width="22" height="20" fill="#F1EAF7"/><rect x="-11" y="-138" width="22" height="20" fill="#F1EAF7"/><rect x="34" y="-138" width="22" height="20" fill="#F1EAF7"/>
+    <rect x="-96" y="-160" width="40" height="160" fill="#E6DDF0"/>
+    <polygon points="-104,-158 -76,-214 -48,-158" fill="#FF9BC8"/>
+    <rect x="56" y="-160" width="40" height="160" fill="#E6DDF0"/>
+    <polygon points="48,-158 76,-214 104,-158" fill="#C77DFF"/>
+    <path d="M-20 0 V-38 A20 20 0 0 1 20 -38 V0 Z" fill="#B97D48"/>
+    <path d="M-86 -110 V-128 A10 10 0 0 1 -66 -128 V-110 Z" fill="#FFE66D"/>
+    <path d="M66 -110 V-128 A10 10 0 0 1 86 -128 V-110 Z" fill="#FFE66D"/>
+  </g>
+
+  <text id="eq" text-anchor="middle"></text>
+  <text id="plus" text-anchor="middle" font-size="64">+</text>
+  <g id="trays"></g>
+  <g id="items"></g>
+  <g id="choices" class="choices"></g>
+
+  <g id="carsi">
+    <g id="princess" stroke="#4A3F6B" stroke-width="3" stroke-linejoin="round">
+      <rect x="580" y="300" width="120" height="230" fill="transparent" stroke="none"/>
+      <path d="M600 360 Q594 406 606 420 L654 420 Q666 406 660 360 Z" fill="#7A4A2A"/>
+      <polyline points="619,404 602,432 597,446" fill="none" stroke-width="14" stroke-linecap="round"/>
+      <polyline points="619,404 602,432 597,446" fill="none" stroke="#F7CBA8" stroke-width="8" stroke-linecap="round"/>
+      <g id="wandArm">
+        <line x1="641" y1="404" x2="664" y2="378" stroke-width="14" stroke-linecap="round"/>
+        <line x1="641" y1="404" x2="664" y2="378" stroke="#F7CBA8" stroke-width="8" stroke-linecap="round"/>
+        <line x1="664" y1="378" x2="676" y2="340" stroke="#FFD84D" stroke-width="5" stroke-linecap="round"/>
+        <path d="M678 322 L682 333 L693 334 L684 341 L687 352 L678 346 L669 352 L672 341 L663 334 L674 333 Z" fill="#FFD84D"/>
+      </g>
+      <g fill="#FF7EB6">
+        <path d="M590 522 Q598 462 614 430 L646 430 Q662 462 670 522 Z"/>
+        <path d="M614 432 L646 432 L642 398 L618 398 Z"/>
+      </g>
+      <g fill="#FFFFFF" stroke="none" opacity=".8">
+        <circle cx="612" cy="490" r="4"/><circle cx="630" cy="470" r="4"/><circle cx="648" cy="490" r="4"/>
+        <circle cx="621" cy="508" r="3"/><circle cx="639" cy="508" r="3"/>
+      </g>
+      <rect x="625" y="384" width="10" height="16" fill="#F7CBA8"/>
+      <circle cx="630" cy="362" r="24" fill="#F7CBA8"/>
+      <path d="M606 358 Q608 334 630 334 Q652 334 654 358 Q642 346 630 350 Q618 346 606 358 Z" fill="#7A4A2A"/>
+      <polygon points="614,340 616,318 623,330 630,314 637,330 644,318 646,340" fill="#FFD84D"/>
+      <circle cx="630" cy="331" r="3.5" fill="#FF5A5F" stroke="none"/>
+      <g id="eyes" fill="#4A3F6B" stroke="none"><circle cx="621" cy="364" r="3.6"/><circle cx="639" cy="364" r="3.6"/></g>
+      <circle cx="614" cy="373" r="5" fill="#FF9EB5" stroke="none" opacity=".7"/>
+      <circle cx="646" cy="373" r="5" fill="#FF9EB5" stroke="none" opacity=".7"/>
+      <path id="smile" d="M622 375 Q630 383 638 375" fill="none" stroke-linecap="round"/>
+      <ellipse id="mouthOpen" cx="630" cy="378" rx="5" ry="5" fill="#B8436A" stroke="none"/>
+    </g>
+  </g>
+
+  <g id="hint"><text font-size="58" text-anchor="middle">👆</text></g>
+</svg>
+
+<canvas id="fx"></canvas>
+
+<div class="turn" id="turn" role="status" aria-live="polite">
+  <svg viewBox="0 0 40 40" aria-hidden="true">
+    <circle cx="20" cy="20" r="15" fill="#FFFDF7" stroke="#4A3F6B" stroke-width="4"/>
+    <circle id="turnRing" cx="20" cy="20" r="15" fill="none" stroke="#4A3F6B" stroke-width="8" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/>
+  </svg>
+  <span id="turnName">Avni</span>
+</div>
+
+<div class="controls">
+  <button class="btn" id="sayBtn" aria-label="Hear it again">
+    <svg viewBox="0 0 40 40" fill="none" stroke="#4A3F6B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 15 H13 L22 7 V33 L13 25 H6 Z" fill="#FFD84D"/><path d="M27 14 Q31 20 27 26"/><path d="M31 9 Q38 20 31 31"/>
+    </svg>
+  </button>
+  <button class="btn" id="nextBtn" aria-label="New problem">
+    <svg viewBox="0 0 40 40" fill="none" stroke="#4A3F6B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 20 H32"/><path d="M22 10 L32 20 L22 30"/>
+    </svg>
+  </button>
+</div>
+
+<button id="start" aria-label="Play">
+  <span><svg viewBox="0 0 40 40"><path d="M8 4 L36 20 L8 36 Z" fill="#4A3F6B" stroke="#4A3F6B" stroke-width="4" stroke-linejoin="round"/></svg></span>
+</button>
+
+<script>
+(() => {
+  // ---------- page setup: Math Unit 4, Teen Numbers (ten and some more), sums to 20 ----------
+  const MAX = 20, FRAMES = 2;
+  function makeProblem(n) {
+    if (n < 2 || Math.random() < 0.45) return { a: 10, b: randInt(1, 10) }; // ten and some more
+    const a = randInt(5, 10);
+    return { a, b: randInt(Math.max(1, 11 - a), 10) }; // fill a ten, spill into the next tray
+  }
+  function winLine(a, b, s) {
+    if (s === 20) return `${a} and ${b} make 20. Two full trays!`;
+    return a === 10 ? `10 and ${b} make ${s}!` : `${a} and ${b} make ${s}. That's 10 and ${s - 10} more!`;
+  }
+
+  // ---------- shared ----------
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.getElementById('scene');
+  const COLORS = ['#FF5A5F','#FF9F1C','#FFD93D','#6BCB77','#4D96FF','#6A5ACD','#C77DFF'];
+  const TREATS = [['🧁','cupcake','cupcakes'],['🍓','strawberry','strawberries'],['🍪','cookie','cookies'],
+    ['🍩','donut','donuts'],['🍭','lollipop','lollipops'],['🍎','apple','apples'],['🍬','candy','candies']];
+  const GROUP = [{ fill: '#FFC2D8', stroke: '#E2457F' }, { fill: '#B4F0E8', stroke: '#1E9E92' }];
+  // spoken feedback names what the child did (strategy, effort, persistence), never "you're smart" or "correct"
+  const PRAISE = {
+    counted: ['I noticed you touched each {t} as you counted. That careful counting really helps!',
+      'You counted every {t} one by one to check. That is a smart strategy, {k}!',
+      'You used the tray to help you count. Great thinking!',
+      'You took your time and counted carefully, {k}. That is how we learn!',
+      'Point, count, point, count! You went step by step, {k}!',
+      'Your counting fingers worked so hard! Every {t} got counted.',
+      'One by one, just like a real tea party helper!'],
+    head: ['You worked that out in your head, {k}! All that practice is paying off.',
+      'You thought it through before you tapped. Your counting is getting stronger!',
+      'You looked at the {ts} and made a plan. Nice thinking, {k}!',
+      'Practicing every day is making your brain stronger, {k}!',
+      'Zoom! You thought that through so fast. That comes from lots of practice!',
+      'Did you count on in your head? What a clever plan, {k}!',
+      'Your thinking cap is sparkling! You used everything you practiced.'],
+    tried: ['You tried again and found it, {k}! Mistakes help us learn.',
+      "I noticed you didn't give up when that was tricky!",
+      'That first try helped you learn, and then you found it!',
+      'Oops, then yay! You learned from your first try, {k}!',
+      'You checked again and found it. That is how real math detectives work!'],
+    helped: ['We counted together, and you found the number! Counting helps us check.',
+      'You listened carefully while we counted. That is great learning, {k}!',
+      'Counting together helped, and you kept going!',
+      'Teamwork! We counted together, and you found it, {k}!',
+      'We made a counting team! Thank you for counting with me.'],
+    persisted: ['You kept trying different numbers until it worked. That is real persistence, {k}!',
+      "That one was tricky, and you kept going. I'm proud of how hard you worked!",
+      'You kept trying different ways until it worked!',
+      'Tricky, tricky! But you kept going, {k}. Your brain grew a little bigger!',
+      'You never gave up! Even my crown is cheering for you!'],
+    oops: ['Hmm, {v}? Good try! Let\'s count to check. Tap the {ts}.',
+      '{v} is a good guess. Mistakes help us learn! Let\'s count the {ts}.',
+      "Hmm, {v}? Let's check by counting the {ts}, {k}.",
+      "Ooh, {v}? Let's be number detectives and count the {ts}!",
+      "Hmm, {v}? My crown says let's check! Count the {ts}, {k}."],
+    oopsAgain: ["That's okay! Tricky ones help our brains grow. Let's keep counting.",
+      'Still thinking? Good! Counting the {ts} will help you check.',
+      "Keep going, {k}! Mistakes are how we learn. Let's count one more time."],
+    together: ["Hmm, {v}? Good try! Let's count together to check.",
+      'Mistakes help us learn. Let\'s count together, {k}!',
+      "Ooh, {v}? Let's count together, nice and slow!"],
+    allCounted: ['You counted every one, {k}! Which number shows how many?',
+      'Careful counting! Now, which number shows how many?',
+      'Every {t} is on the tray! Can you find that number, {k}?'],
+    progress: ['That is {n} problems today. You are getting stronger with practice!',
+      '{n} problems! Look how much you have practiced, {k}!',
+      '{n} problems! Your counting muscles are getting so strong!'],
+    opener: ['Ta-da!', 'Hooray!', 'Woo-hoo!', 'Yippee!', 'Yum yum!', 'Hip hip hooray!', 'Sparkle power!', 'Tea party time!'],
+    finale: ['You finished the whole rainbow, {k}! You worked so hard on every one!',
+      'Rainbow complete! You kept trying on every single problem!',
+      'Look at that rainbow, {k}! All your practice built it, one band at a time!']
+  };
+  // turns: one child plays for a random 2–3 minutes, then the other
+  const KIDS = [{ name: 'Avni', color: '#FF9BC8' }, { name: 'Ansh', color: '#7CC4FF' }];
+  let turnIdx = Math.random() < 0.5 ? 0 : 1, turnTotal = 0, turnLeft = 0, turnStarted = false, warned = false;
+  const kid = () => KIDS[turnIdx].name;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const rand = (a, b) => a + Math.random() * (b - a);
+  function randInt(a, b) { return Math.floor(rand(a, b + 1)); }
+  const pick = list => list[Math.floor(Math.random() * list.length)];
+  // a fresh line each time: never the same one twice in a row
+  const lastLine = {};
+  function line(key, vars = {}) {
+    const list = PRAISE[key];
+    let i;
+    do i = Math.floor(Math.random() * list.length); while (list.length > 1 && i === lastLine[key]);
+    lastLine[key] = i;
+    return list[i].replace(/\{(\w+)\}/g, (m, v) => v in vars ? vars[v] : v === 'k' ? kid() : v === 't' ? name(1) : v === 'ts' ? name(2) : m);
+  }
+
+  function el(tag, attrs, parent) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  const eq = document.getElementById('eq');
+  const plus = document.getElementById('plus');
+  const traysG = document.getElementById('trays');
+  const itemsG = document.getElementById('items');
+  const choicesG = document.getElementById('choices');
+  const rainbow = document.getElementById('rainbow');
+  const carsi = document.getElementById('carsi');
+  const princess = document.getElementById('princess');
+  const wandArm = document.getElementById('wandArm');
+  const hint = document.getElementById('hint');
+  const hintText = hint.querySelector('text');
+
+  // ---------- sound ----------
+  let ac, master;
+  function audio() {
+    if (!ac) {
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      master = ac.createGain(); master.gain.value = 0.7; master.connect(ac.destination);
+    }
+    if (ac.state !== 'running') ac.resume().catch(() => {});
+    return ac;
+  }
+  function voice(freq, { dur = 1.1, vol = 0.22, type = 'sine', when = 0, slideTo } = {}) {
+    const a = audio(), t = a.currentTime + when;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur * 0.8);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(master); o.start(t); o.stop(t + dur + 0.05);
+  }
+  const bell = (f, when = 0) => { voice(f, { when }); voice(f * 4, { vol: 0.04, dur: 0.25, when }); };
+  const MAJOR = [0, 2, 4, 5, 7, 9, 11];
+  const countNote = k => 262 * 2 ** ((MAJOR[(k - 1) % 7] + 12 * Math.floor((k - 1) / 7)) / 12); // climbs as the count grows
+  const boop = () => voice(240, { dur: 0.3, vol: 0.2, type: 'triangle', slideTo: 150 });
+  const chime = () => [523.25, 659.25, 783.99, 1046.5].forEach((f, k) => bell(f, k * 0.09));
+  const fanfare = () => [523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5].forEach((f, k) => bell(f, k * 0.12));
+
+  // ---------- Carsi talks ----------
+  let talking = false, mouthTimer = 0, speechToken = 0;
+  function pickVoice() {
+    const vs = speechSynthesis.getVoices();
+    const prefs = ['Samantha', 'Karen', 'Moira', 'Tessa', 'Google UK English Female', 'Google US English', 'Zira', 'Aria', 'Jenny', 'Female'];
+    for (const p of prefs) { const v = vs.find(v => v.name.includes(p)); if (v) return v; }
+    return vs.find(v => v.lang && v.lang.startsWith('en')) || null;
+  }
+  try { speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); } catch (e) {}
+  function stopTalking() { talking = false; princess.classList.remove('talking'); }
+  function say(text, wave = true) {
+    talking = true;
+    princess.classList.add('talking');
+    if (wave) { wandArm.classList.remove('waving'); void wandArm.getBoundingClientRect(); wandArm.classList.add('waving'); }
+    try {
+      const token = ++speechToken;
+      const speak = retry => {
+        const u = new SpeechSynthesisUtterance(text);
+        u.pitch = 1.6; u.rate = 0.92; u.volume = 1;
+        const v = pickVoice(); if (v) u.voice = v;
+        u.onend = stopTalking;
+        let started = false;
+        u.onstart = () => { started = true; };
+        speechSynthesis.resume();
+        speechSynthesis.speak(u);
+        // Chrome on a Mac can get stuck after cancel(); if nothing starts, clear the queue and try once more
+        if (retry) setTimeout(() => {
+          if (!started && token === speechToken) { speechSynthesis.cancel(); setTimeout(() => speak(false), 120); }
+        }, 1500);
+      };
+      // iOS Safari drops an utterance queued right after cancel(), so only cancel when busy and wait a beat
+      if (speechSynthesis.speaking || speechSynthesis.pending) {
+        speechSynthesis.cancel();
+        setTimeout(() => { try { speak(true); } catch (e) {} }, 80);
+      } else {
+        speak(true);
+      }
+    } catch (e) {}
+    clearTimeout(mouthTimer);
+    mouthTimer = setTimeout(stopTalking, 500 + text.length * 70);
+  }
+  const talkTime = text => 900 + text.length * 70;
+  wandArm.addEventListener('animationend', () => wandArm.classList.remove('waving'));
+  // iPhones only allow sound and speech to start from a touchend/click, not pointerdown
+  let speechUnlocked = false;
+  function unlock() {
+    audio();
+    if (speechUnlocked) return;
+    try {
+      const u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0;
+      speechSynthesis.speak(u);
+      speechUnlocked = true;
+    } catch (e) {}
+  }
+  // the play button speaks its greeting straight from the tap instead, which is what unlocks speech on iOS
+  ['touchend', 'click'].forEach(t => addEventListener(t, e => {
+    if (!(e.target.closest && e.target.closest('#start'))) unlock();
+  }, { passive: true }));
+
+  // ---------- particles ----------
+  const fx = document.getElementById('fx'), ctx = fx.getContext('2d');
+  let bits = [];
+  function resize() {
+    const d = Math.min(devicePixelRatio || 1, 2);
+    fx.width = innerWidth * d; fx.height = innerHeight * d;
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  addEventListener('resize', resize); resize();
+  function burst(x, y, colors, n = 16, speed = 5, gravity = 0.12) {
+    if (reduced) n = Math.ceil(n / 3);
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, s = speed * (0.4 + Math.random());
+      bits.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1.5, g: gravity,
+        life: 1, decay: 0.014 + Math.random() * 0.018, size: 4 + Math.random() * 6,
+        color: colors[i % colors.length], shape: Math.random() < 0.55 ? 'star' : 'dot', rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3 });
+    }
+  }
+  function drawStar(x, y, r, rot) {
+    ctx.beginPath();
+    for (let k = 0; k < 8; k++) {
+      const rr = k % 2 ? r * 0.4 : r, a = rot + k * Math.PI / 4;
+      ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+  (function tick() {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    bits = bits.filter(b => b.life > 0);
+    for (const b of bits) {
+      b.vy += b.g; b.x += b.vx; b.y += b.vy; b.vx *= 0.98; b.rot += b.vr; b.life -= b.decay;
+      ctx.globalAlpha = Math.max(0, b.life); ctx.fillStyle = b.color;
+      if (b.shape === 'star') drawStar(b.x, b.y, b.size * 1.4, b.rot);
+      else if (b.shape === 'emoji') {
+        ctx.font = `${b.size}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(b.ch, b.x, b.y);
+      }
+      else { ctx.beginPath(); ctx.arc(b.x, b.y, b.size * 0.7, 0, Math.PI * 2); ctx.fill(); }
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  })();
+  function toScreen(x, y) {
+    const p = svg.createSVGPoint(); p.x = x; p.y = y;
+    return p.matrixTransform(svg.getScreenCTM());
+  }
+  function centerOf(node) {
+    const r = node.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+  function replay(node, cls) { node.classList.remove(cls); void node.getBoundingClientRect(); node.classList.add(cls); }
+  document.addEventListener('animationend', e => {
+    const g = e.target.closest && e.target.closest('.item, #eq');
+    if (g) g.classList.remove('boing', 'pop');
+    if (e.animationName === 'twirl') princess.classList.remove('twirl');
+  });
+
+  // ---------- layout: wide scene, or a tall stack so a phone held upright fills up ----------
+  let L, portrait = false;
+  function computeLayout() {
+    portrait = innerHeight > innerWidth * 1.1;
+    if (!portrait) {
+      const cell = FRAMES === 1 ? 86 : 74, gap = 40;
+      const trays = FRAMES === 1 ? [{ x: 500 - 2.5 * cell, y: 362 }] : [{ x: 500 - gap / 2 - 5 * cell, y: 362 }, { x: 500 + gap / 2, y: 362 }];
+      L = { w: 1000, h: 750, eq: [500, 165], eqSize: 100, grpA: [270, 268], grpB: [730, 268], s: 54, r: 23, cell, trays,
+        choiceY: 640, choiceX: [360, 500, 640], cr: 56, carsi: [150, 742, 1.05], ground: 650, castle: true, rb: [500, 670, 470, 32] };
+    } else {
+      const cell = FRAMES === 1 ? 96 : 84, x0 = 300 - 2.5 * cell;
+      const trays = FRAMES === 1 ? [{ x: x0, y: 420 }] : [{ x: x0, y: 410 }, { x: x0, y: 410 + 2 * cell + 22 }];
+      const choiceY = trays[trays.length - 1].y + 2 * cell + 120;
+      L = { w: 600, h: choiceY + 190, eq: [300, 160], eqSize: 92, grpA: [155, 295], grpB: [445, 295], s: 50, r: 22, cell, trays,
+        choiceY, choiceX: [255, 385, 515], cr: 54, carsi: [85, choiceY + 175, 0.95], ground: choiceY + 30, castle: false, rb: [300, 560, 285, 24] };
+    }
+  }
+  function homePos(it) {
+    const c = it.g ? L.grpB : L.grpA, n = it.n;
+    const rows = Math.ceil(n / 5), row = Math.floor(it.i / 5), col = it.i % 5, inRow = Math.min(5, n - row * 5);
+    return [c[0] + (col - (inRow - 1) / 2) * L.s, c[1] + (row - (rows - 1) / 2) * L.s];
+  }
+  function slotPos(k) {
+    const t = L.trays[Math.floor(k / 10)], j = k % 10;
+    return [t.x + (j % 5 + 0.5) * L.cell, t.y + (Math.floor(j / 5) + 0.5) * L.cell];
+  }
+  function place(it) {
+    const [x, y] = it.slot < 0 ? homePos(it) : slotPos(it.slot);
+    const sc = (it.slot < 0 ? L.r : L.cell * 0.4) / 23;
+    it.el.style.transform = `translate(${x}px, ${y}px) scale(${sc})`;
+  }
+  function drawRainbow() {
+    rainbow.textContent = '';
+    const [cx, cy, R, W] = L.rb;
+    COLORS.forEach((c, k) => {
+      const r = R - k * W, lit = k < bandsLit;
+      const p = el('path', { d: `M${cx - r} ${cy} A${r} ${r} 0 0 1 ${cx + r} ${cy}`, class: 'band', 'stroke-width': W - 2,
+        stroke: lit ? c : '#FFFFFF', 'stroke-opacity': lit ? 0.95 : 0.45 }, rainbow);
+      p.dataset.i = k;
+    });
+  }
+  function drawTrays() {
+    traysG.textContent = '';
+    const c = L.cell;
+    L.trays.forEach(t => {
+      el('rect', { x: t.x - 10, y: t.y - 10, width: 5 * c + 20, height: 2 * c + 20, rx: 22, fill: 'var(--tray)', stroke: 'var(--ink)', 'stroke-width': 5 }, traysG);
+      for (let j = 0; j < 10; j++) {
+        el('circle', { cx: t.x + (j % 5 + 0.5) * c, cy: t.y + (Math.floor(j / 5) + 0.5) * c, r: c * 0.4, fill: '#FFFFFF', stroke: 'var(--plate)', 'stroke-width': 4 }, traysG);
+      }
+      for (let k = 1; k < 5; k++) el('line', { x1: t.x + k * c, y1: t.y, x2: t.x + k * c, y2: t.y + 2 * c, stroke: 'var(--plate)', 'stroke-width': 3 }, traysG);
+      el('line', { x1: t.x, y1: t.y + c, x2: t.x + 5 * c, y2: t.y + c, stroke: 'var(--plate)', 'stroke-width': 3 }, traysG);
+    });
+  }
+  function layout() {
+    computeLayout();
+    svg.setAttribute('viewBox', `0 0 ${L.w} ${L.h}`);
+    eq.setAttribute('x', L.eq[0]); eq.setAttribute('y', L.eq[1]); eq.setAttribute('font-size', L.eqSize);
+    plus.setAttribute('x', (L.grpA[0] + L.grpB[0]) / 2); plus.setAttribute('y', L.grpA[1] + 22);
+    document.getElementById('ground').setAttribute('transform', `translate(0 ${L.ground})`);
+    const castle = document.getElementById('castle');
+    castle.setAttribute('transform', `translate(905 ${L.ground + 6}) scale(.7)`);
+    castle.style.display = L.castle ? '' : 'none';
+    const [cx, cy, cs] = L.carsi;
+    carsi.setAttribute('transform', `translate(${cx} ${cy}) scale(${cs}) translate(-630 -522)`);
+    drawRainbow(); drawTrays();
+    items.forEach(it => { it.el.classList.add('noanim'); place(it); });
+    void svg.getBoundingClientRect();
+    items.forEach(it => it.el.classList.remove('noanim'));
+    [...choicesG.children].forEach((c, k) => c.setAttribute('transform', `translate(${L.choiceX[k]} ${L.choiceY})`));
+    placeHint();
+  }
+  function placeHint() {
+    const first = items.find(it => it.slot < 0);
+    if (!first || hintDone) { hint.style.opacity = 0; return; }
+    const [x, y] = homePos(first);
+    hintText.setAttribute('x', x + 6); hintText.setAttribute('y', y + 78);
+    hint.style.opacity = 1;
+  }
+
+  // ---------- game ----------
+  let prob = null, items = [], total = 0, filled = 0, counted = 0, helped = false, tries = 0, phase = 'idle', solved = 0, bandsLit = 0, treatIdx = randInt(0, 6), hintDone = false, nextTimer = 0;
+  const name = n => n === 1 ? TREATS[treatIdx][1] : TREATS[treatIdx][2];
+
+  function newProblem() {
+    clearTimeout(nextTimer);
+    items.forEach(it => { it.el.classList.add('leave'); setTimeout(() => it.el.remove(), 400); });
+    if (bandsLit >= COLORS.length) { bandsLit = 0; drawRainbow(); }
+    let p;
+    do p = makeProblem(solved); while (prob && p.a === prob.a && p.b === prob.b);
+    prob = p; total = p.a + p.b; filled = 0; counted = 0; helped = false; tries = 0; phase = 'play';
+    treatIdx = (treatIdx + 1) % TREATS.length;
+    items = [];
+    [p.a, p.b].forEach((n, g) => {
+      for (let i = 0; i < n; i++) {
+        const node = el('g', { class: 'item noanim' }, itemsG);
+        const inner = el('g', { class: 'inner' }, node);
+        el('circle', { r: 23, fill: GROUP[g].fill, stroke: GROUP[g].stroke, 'stroke-width': 4 }, inner);
+        const t = el('text', { y: 1, 'font-size': 27, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, inner);
+        t.textContent = TREATS[treatIdx][0];
+        const it = { el: node, g, i, n, slot: -1 };
+        node._item = it;
+        items.push(it);
+        const [x, y] = homePos(it);
+        node.style.transform = `translate(${x}px, ${y - 500}px) scale(${L.r / 23})`;
+        node.style.transitionDelay = (g * 0.35 + i * 0.06) + 's';
+      }
+    });
+    void svg.getBoundingClientRect();
+    items.forEach(it => { it.el.classList.remove('noanim'); place(it); });
+    setTimeout(() => items.forEach(it => { it.el.style.transitionDelay = ''; }), 1500);
+
+    eq.textContent = '';
+    const parts = [[p.a, GROUP[0].stroke], [' + '], [p.b, GROUP[1].stroke], [' = '], ['?', '#E8A400']];
+    parts.forEach(([txt, fill]) => { const s = el('tspan', fill ? { fill } : {}, eq); s.textContent = txt; });
+    eq.lastChild.id = 'answer';
+
+    choicesG.textContent = '';
+    choicesG.classList.remove('glow');
+    const opts = new Set([total]);
+    while (opts.size < 3) {
+      const v = total + pick([-2, -1, 1, 2]);
+      if (v >= 1 && v <= MAX) opts.add(v);
+    }
+    [...opts].sort(() => Math.random() - 0.5).forEach((v, k) => {
+      const c = el('g', { class: 'choice', transform: `translate(${L.choiceX[k]} ${L.choiceY})` }, choicesG);
+      c.dataset.v = v;
+      const inner = el('g', { class: 'inner' }, c);
+      el('circle', { r: L.cr, fill: '#FFFDF7', stroke: 'var(--ink)', 'stroke-width': 5 }, inner);
+      const t = el('text', { y: 2, 'font-size': v > 9 ? 56 : 66, 'text-anchor': 'middle', 'dominant-baseline': 'central' }, inner);
+      t.textContent = v;
+    });
+    placeHint();
+    if (turnStarted) setTimeout(ask, 900);
+  }
+  function ask() {
+    if (!prob) return;
+    say(`${kid()}! ${prob.a} ${name(prob.a)}, and ${prob.b} more! How many in all?`);
+  }
+
+  function tapItem(it) {
+    if (phase !== 'play') return;
+    if (it.slot >= 0) {
+      replay(it.el, 'boing');
+      bell(countNote(it.slot + 1));
+      say(String(it.slot + 1), false);
+      return;
+    }
+    it.slot = filled++;
+    counted++;
+    place(it);
+    setTimeout(() => replay(it.el, 'boing'), 350);
+    bell(countNote(filled));
+    if (!hintDone) { hintDone = true; placeHint(); }
+    if (FRAMES > 1 && filled === 10 && total > 10) say('Ten! One full tray!', false);
+    else say(String(filled), false);
+    if (filled === total) {
+      setTimeout(() => {
+        if (phase !== 'play') return;
+        replay(choicesG, 'glow');
+        say(line('allCounted'));
+      }, 1100);
+    } else {
+      items.forEach(o => o.el.classList.remove('nudge'));
+    }
+  }
+
+  function tapChoice(c) {
+    if (phase !== 'play' || c.classList.contains('wrong')) return;
+    if (!hintDone) { hintDone = true; placeHint(); }
+    const v = +c.dataset.v;
+    if (v === total) return win(c);
+    tries++;
+    c.classList.add('wrong');
+    boop();
+    if (filled < total) {
+      say(line(tries > 1 ? 'oopsAgain' : 'oops', { v }));
+      items.forEach(o => { if (o.slot < 0) replay(o.el, 'nudge'); });
+      return;
+    }
+    // everything is on the tray already: count it together, then let them try again
+    phase = 'help';
+    helped = true;
+    const words = line('together', { v });
+    say(words);
+    const start = talkTime(words);
+    const onTray = items.filter(o => o.slot >= 0).sort((a, b) => a.slot - b.slot);
+    onTray.forEach((o, k) => setTimeout(() => {
+      replay(o.el, 'boing'); bell(countNote(k + 1)); say(String(k + 1), false);
+    }, start + k * 750));
+    setTimeout(() => {
+      phase = 'play';
+      replay(choicesG, 'glow');
+      say('Which number did we land on?');
+    }, start + onTray.length * 750 + 300);
+  }
+
+  function win(c) {
+    phase = 'won';
+    solved++;
+    c.classList.add('right');
+    const ans = document.getElementById('answer');
+    ans.textContent = total;
+    replay(eq, 'pop');
+    // fill the rest of the tray so the whole amount shows
+    items.filter(o => o.slot < 0).forEach((o, k) => setTimeout(() => { o.slot = filled++; place(o); }, k * 90));
+    fanfare();
+    replay(princess, 'twirl');
+    setTimeout(treatShower, 400);
+    const p = centerOf(c);
+    burst(p.x, p.y, COLORS, 30, 6);
+    if (bandsLit < COLORS.length) {
+      bandsLit++;
+      drawRainbow();
+      const [cx, cy, R, W] = L.rb, r = R - (bandsLit - 1) * W;
+      for (let k = 0; k < 5; k++) {
+        const a = Math.PI * (0.15 + 0.175 * k), q = toScreen(cx - Math.cos(a) * r, cy - Math.sin(a) * r);
+        setTimeout(() => burst(q.x, q.y, [COLORS[bandsLit - 1], '#FFFFFF'], 10, 4), 200 + k * 90);
+      }
+    }
+    const kind = helped ? 'helped' : tries > 1 ? 'persisted' : tries ? 'tried' : counted === total ? 'counted' : 'head';
+    let words = line('opener') + ' ' + winLine(prob.a, prob.b, total) + ' ' + line(kind);
+    if (solved % 3 === 0 && bandsLit < COLORS.length) words += ' ' + line('progress', { n: solved });
+    say(words);
+    let wait = talkTime(words) + 600;
+    if (bandsLit === COLORS.length) {
+      setTimeout(finale, wait);
+      wait += 5200;
+    }
+    nextTimer = setTimeout(newProblem, wait);
+  }
+  function treatShower() {
+    const r = traysG.getBoundingClientRect(), chars = [TREATS[treatIdx][0], '💖', '✨'];
+    for (let i = 0; i < (reduced ? 6 : 18); i++) {
+      bits.push({ x: r.left + Math.random() * r.width, y: r.top + Math.random() * r.height, vx: rand(-2, 2), vy: rand(-8, -3), g: 0.16,
+        life: 1, decay: 0.012, size: rand(26, 40), shape: 'emoji', ch: chars[i % 3], rot: 0, vr: 0 });
+    }
+  }
+  function finale() {
+    say(line('finale'));
+    for (let k = 0; k < 8; k++) setTimeout(() => {
+      const q = toScreen(rand(L.w * 0.15, L.w * 0.85), rand(L.h * 0.12, L.h * 0.45));
+      burst(q.x, q.y, COLORS, 40, 7, 0.06);
+      voice(300, { dur: 0.5, vol: 0.12, type: 'triangle', slideTo: 1400 });
+    }, k * 300);
+    COLORS.forEach((_, k) => bell(countNote(k + 8), 2.6 + k * 0.1));
+  }
+
+  function tapCarsi(x, y) {
+    chime();
+    burst(x, y - 30, ['#FFD84D', '#FF9BC8', '#FFFFFF'], 14, 4);
+    if (phase === 'play') ask();
+  }
+
+  // ---------- input: tap, or slide a finger across the treats to count them ----------
+  let dragging = false, last = null;
+  function hit(target, x, y, isDown) {
+    const item = target.closest('.item');
+    if (item) {
+      if (item !== last) tapItem(item._item);
+      last = item;
+      return;
+    }
+    last = null;
+    if (!isDown) return;
+    const choice = target.closest('.choice'); if (choice) return tapChoice(choice);
+    if (target.closest('#eq')) return phase === 'play' && ask();
+    if (target.closest('#princess')) return tapCarsi(x, y);
+    const band = target.closest('.band');
+    if (band) { bell(countNote(+band.dataset.i + 1) * 2); burst(x, y, [COLORS[+band.dataset.i], '#FFFFFF'], 10, 4); return; }
+    if (target.classList.contains('sky')) { bell(countNote(randInt(8, 14))); burst(x, y, ['#FFFFFF', '#FFE66D'], 8, 3, 0.04); }
+  }
+  svg.addEventListener('pointerdown', e => {
+    audio();
+    dragging = true; last = null;
+    hit(e.target, e.clientX, e.clientY, true);
+  });
+  addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const t = document.elementFromPoint(e.clientX, e.clientY);
+    if (t && svg.contains(t)) hit(t, e.clientX, e.clientY, false);
+  });
+  ['pointerup', 'pointercancel'].forEach(t => addEventListener(t, () => { dragging = false; }));
+
+  document.getElementById('sayBtn').addEventListener('click', () => { if (phase === 'play') ask(); });
+  document.getElementById('nextBtn').addEventListener('click', () => { if (phase !== 'idle') { chime(); newProblem(); } });
+  const startBtn = document.getElementById('start');
+  startBtn.addEventListener('click', () => {
+    audio();
+    speechUnlocked = true;
+    startBtn.hidden = true;
+    turnStarted = true;
+    chime();
+    const hi = `Hi ${kid()}! Welcome to my tea party! It's your turn!`;
+    say(hi);
+    phase = 'play';
+    setTimeout(ask, talkTime(hi) + 400);
+  });
+
+  // ---------- turns ----------
+  const turnBadge = document.getElementById('turn');
+  const turnName = document.getElementById('turnName');
+  const turnRing = document.getElementById('turnRing');
+  function showTurn() {
+    turnName.textContent = KIDS[turnIdx].name;
+    turnBadge.style.setProperty('--kid', KIDS[turnIdx].color);
+    turnRing.setAttribute('stroke-dashoffset', 0);
+    turnTotal = turnLeft = Math.round(rand(120, 180));
+    warned = false;
+  }
+  function switchTurn() {
+    turnIdx = 1 - turnIdx;
+    showTurn();
+    replay(turnBadge, 'pop');
+    const r = turnBadge.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.bottom, [KIDS[turnIdx].color, ...COLORS], 40, 7, 0.1);
+    fanfare();
+    say(`Time to switch! ${kid()}'s turn!`);
+    setTimeout(() => { if (phase === 'play') ask(); }, 2800);
+  }
+  setInterval(() => {
+    if (!turnStarted || document.hidden) return;
+    turnLeft--;
+    turnRing.setAttribute('stroke-dashoffset', (100 * (1 - turnLeft / turnTotal)).toFixed(1));
+    if (turnLeft === 15 && !warned) { warned = true; say(`Almost time, ${kid()}!`); }
+    if (turnLeft <= 0) switchTurn();
+  }, 1000);
+  showTurn();
+
+  computeLayout();
+  addEventListener('resize', layout);
+  newProblem();
+  phase = 'idle';
+  layout();
+})();
+</script>
+
+</html>
